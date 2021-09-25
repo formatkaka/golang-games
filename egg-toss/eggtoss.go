@@ -1,6 +1,7 @@
 package eggtoss
 
 import (
+	_ "image/jpeg"
 	_ "image/png"
 	"log"
 
@@ -10,11 +11,17 @@ import (
 
 const (
 	PADDING = 20
-	LEFT    = "going-left"
-	RIGHT   = "going-right"
 
-	DEFAULT_BASKET_POS_X = (600 - 320) / 2
-	DEFAULT_BASKET_POS_Y = 900 - 160 - PADDING
+	WINDOW_WIDTH  = 600
+	WINDOW_HEIGHT = 900
+
+	IMAGE_WIDTH = 240
+
+	LEFT  = "going-left"
+	RIGHT = "going-right"
+
+	DEFAULT_BASKET_POS_X = (600 - IMAGE_WIDTH) / 2
+	DEFAULT_BASKET_POS_Y = 900 - IMAGE_WIDTH/2 - PADDING
 )
 
 type Game struct {
@@ -23,40 +30,34 @@ type Game struct {
 }
 
 var basketImg, eggImage, bgImage *ebiten.Image
+var basket1, basket2 *Basket
 
 func init() {
-	var err error
-	basketImg, _, err = ebitenutil.NewImageFromFile("egg-toss/basket.png")
+	var err1, err2 error
+	basketImg, _, err1 = ebitenutil.NewImageFromFile("egg-toss/static/basket.png")
+	bgImage, _, err2 = ebitenutil.NewImageFromFile("egg-toss/static/bg.jpg")
 
-	if err != nil {
-		log.Fatal(err)
+	basket1 = initBasket(DEFAULT_BASKET_POS_X, DEFAULT_BASKET_POS_Y)
+	basket2 = initBasket(DEFAULT_BASKET_POS_X, 100)
+
+	if err1 != nil || err2 != nil {
+		log.Fatal(err1, err2)
 	}
 }
 
 func (g *Game) Update() error {
 
-	if g.pos < -1 {
-		g.dir = RIGHT
-	} else if g.pos > 1 {
-		g.dir = LEFT
-	}
-
-	if g.dir == LEFT {
-		g.pos = g.pos - 0.03
-	} else {
-		g.pos = g.pos + 0.03
-	}
+	basket1.Update()
+	basket2.Update()
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
+	screen.DrawImage(bgImage, nil)
 
-	updatedX := DEFAULT_BASKET_POS_X + g.pos*DEFAULT_BASKET_POS_X
-
-	op.GeoM.Translate(updatedX, DEFAULT_BASKET_POS_Y)
-	screen.DrawImage(basketImg, op)
+	basket1.Draw(screen)
+	basket2.Draw(screen)
 }
 
 func (g *Game) Layout(w int, h int) (sW, sH int) {

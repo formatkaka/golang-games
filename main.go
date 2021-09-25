@@ -5,6 +5,5 @@ import (
 )
 
 func main() {
-	// game1.PlayGame()
 	eggtoss.PlayGame()
 }
