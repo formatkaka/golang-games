@@ -1,9 +1,10 @@
 package main
 
 import (
-	game1 "github.com/formatkaka/golang-games/game-1"
+	eggtoss "github.com/formatkaka/golang-games/egg-toss"
 )
 
 func main() {
-	game1.PlayGame()
+	// game1.PlayGame()
+	eggtoss.PlayGame()
 }
