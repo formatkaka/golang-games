@@ -1,4 +1,4 @@
-module github.com/formatkaka/golang-game-1
+module github.com/formatkaka/golang-games
 
 go 1.17
 
