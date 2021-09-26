@@ -1,7 +1,6 @@
 package eggtoss
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -72,7 +71,6 @@ func (b *Basket) Update() {
 		}
 	}
 
-	fmt.Println(b)
 	if b.down && !contains(Y_POS, b.y) {
 		b.y = b.y + 5
 	} else if b.down && contains(Y_POS, b.y) {
@@ -87,6 +85,11 @@ func (b *Basket) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(b.x, b.y)
 
 	screen.DrawImage(basketImg, op)
+
+	op2 := &ebiten.DrawImageOptions{}
+	op2.GeoM.Scale(0.5, 0.5)
+	op2.GeoM.Translate(80, -10)
+	// basketImg.DrawImage(eggImage, op2)
 }
 
 // -600,100,800

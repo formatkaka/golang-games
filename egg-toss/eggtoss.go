@@ -4,7 +4,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -30,17 +29,20 @@ type Game struct{}
 
 var basketImg, eggImage, bgImage *ebiten.Image
 var basket1, basket2 *Basket
+var ball *Ball
 
 func init() {
-	var err1, err2 error
+	var err1, err2, err3 error
 	basketImg, _, err1 = ebitenutil.NewImageFromFile("egg-toss/static/basket.png")
 	bgImage, _, err2 = ebitenutil.NewImageFromFile("egg-toss/static/bg.jpg")
+	eggImage, _, err3 = ebitenutil.NewImageFromFile("egg-toss/static/panipuri.png")
 
 	basket1 = initBasket(DEFAULT_BASKET_POS_X, DEFAULT_BASKET_POS_Y, "b1")
 	basket2 = initBasket(DEFAULT_BASKET_POS_X, 100, "b2")
+	ball = initBall(basket1)
 
-	if err1 != nil || err2 != nil {
-		log.Fatal(err1, err2)
+	if err1 != nil || err2 != nil || err3 != nil {
+		log.Fatal(err1, err2, err3)
 	}
 }
 
@@ -50,19 +52,21 @@ func (g *Game) Update() error {
 
 	if isSpacebar {
 		// if spacebar released, shift baskets
-		basket3 := initBasket(DEFAULT_BASKET_POS_X, -350, "b3")
-		basket1.GoDown()
-		basket2.GoDown()
-		basket3.GoDown()
+		// basket3 := initBasket(DEFAULT_BASKET_POS_X, -350, "b3")
+		// basket1.GoDown()
+		// basket2.GoDown()
+		// basket3.GoDown()
 
-		time.AfterFunc(1*time.Second, func() {
-			basket1 = basket2
-			basket2 = basket3
-		})
+		// time.AfterFunc(1*time.Second, func() {
+		// 	basket1 = basket2
+		// 	basket2 = basket3
+		// })
+		ball.throw()
 	}
 
 	basket1.Update()
 	basket2.Update()
+	ball.Update(basket1, basket2)
 
 	return nil
 }
@@ -72,6 +76,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	basket1.Draw(screen)
 	basket2.Draw(screen)
+	ball.Draw(screen)
 	// basket3.Draw(screen)
 }
 
