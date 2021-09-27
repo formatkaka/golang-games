@@ -4,6 +4,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -39,6 +40,7 @@ func init() {
 
 	basket1 = initBasket(DEFAULT_BASKET_POS_X, DEFAULT_BASKET_POS_Y, "b1")
 	basket2 = initBasket(DEFAULT_BASKET_POS_X, 100, "b2")
+
 	ball = initBall(basket1)
 
 	if err1 != nil || err2 != nil || err3 != nil {
@@ -51,22 +53,37 @@ func (g *Game) Update() error {
 	isSpacebar := inpututil.IsKeyJustReleased(ebiten.KeySpace)
 
 	if isSpacebar {
-		// if spacebar released, shift baskets
-		// basket3 := initBasket(DEFAULT_BASKET_POS_X, -350, "b3")
-		// basket1.GoDown()
-		// basket2.GoDown()
-		// basket3.GoDown()
-
-		// time.AfterFunc(1*time.Second, func() {
-		// 	basket1 = basket2
-		// 	basket2 = basket3
-		// })
 		ball.throw()
 	}
 
 	basket1.Update()
 	basket2.Update()
-	ball.Update(basket1, basket2)
+	ball.Update()
+
+	if ball.checkForCollision {
+		if ball.x > basket2.x-120 && ball.x < basket2.x+120 {
+			// Successfull collision
+			ball.basket = basket2
+			basket1.GoDown()
+			basket2.GoDown()
+			basketNew := initBasket(DEFAULT_BASKET_POS_X, -200, "b3")
+			basketNew.GoDown()
+
+			time.AfterFunc(1*time.Second, func() {
+				basket1 = basket2
+				basket2 = basketNew
+			})
+		} else {
+			// No collision. Prepare to end the game
+			ball.fallDown = true
+		}
+
+		ball.checkForCollision = false
+	}
+
+	if ball.fallDown && ball.y >= WINDOW_HEIGHT {
+		log.Fatal("End the game")
+	}
 
 	return nil
 }
