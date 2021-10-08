@@ -26,11 +26,14 @@ const (
 	DEFAULT_BASKET_POS_Y = 750
 )
 
-type Game struct{}
+type Game struct {
+	state string
+}
 
 var basketImg, eggImage, bgImage *ebiten.Image
 var basket1, basket2 *Basket
 var ball *Ball
+var portal *Portal
 
 func init() {
 	var err1, err2, err3 error
@@ -43,6 +46,8 @@ func init() {
 
 	ball = initBall(basket1)
 
+	portal = initPortal()
+
 	if err1 != nil || err2 != nil || err3 != nil {
 		log.Fatal(err1, err2, err3)
 	}
@@ -53,7 +58,16 @@ func (g *Game) Update() error {
 	isSpacebar := inpututil.IsKeyJustReleased(ebiten.KeySpace)
 
 	if isSpacebar {
-		ball.throw()
+
+		if g.state == ENTRY {
+			g.state = PLAYING
+		} else if g.state == PLAYING {
+			ball.throw()
+		} else {
+			g.state = PLAYING
+			ball.fallDown = false
+		}
+
 	}
 
 	basket1.Update()
@@ -76,24 +90,33 @@ func (g *Game) Update() error {
 		} else {
 			// No collision. Prepare to end the game
 			ball.fallDown = true
+
 		}
 
 		ball.checkForCollision = false
 	}
 
 	if ball.fallDown && ball.y >= WINDOW_HEIGHT {
-		log.Fatal("End the game")
+		g.state = EXIT
+
+		// log.Fatal("End the game")
 	}
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.DrawImage(bgImage, nil)
 
-	basket1.Draw(screen)
-	basket2.Draw(screen)
-	ball.Draw(screen)
+	// if g.state == ENTRY || g.state == EXIT {
+	portal.Draw(g, screen)
+	// }
+
+	if g.state == PLAYING {
+		screen.DrawImage(bgImage, nil)
+		basket1.Draw(screen)
+		basket2.Draw(screen)
+		ball.Draw(screen)
+	}
 	// basket3.Draw(screen)
 }
 
@@ -105,7 +128,7 @@ func PlayGame() {
 	ebiten.SetWindowSize(600, 900)
 	ebiten.SetWindowTitle("Eggs")
 
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	if err := ebiten.RunGame(&Game{state: ENTRY}); err != nil {
 		log.Fatal(err)
 	}
 }
